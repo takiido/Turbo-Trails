@@ -1,16 +1,27 @@
+// Copyright takiido. All Rights Reserved.
 using UnityEngine;
 
 namespace Core.Player
 {
+    [RequireComponent(typeof(Rigidbody))]
     public class SpringRaycast : MonoBehaviour
     {
-        public bool debug = false;
-        
+        [Header("Debugging")]
+        [Tooltip("Enable to visualize the raycast in the Scene view.")]
+        public bool debug;
+
+        [Header("Spring Settings")]
+        [Tooltip("Layer mask for detecting ground.")]
         public LayerMask groundLayer;
 
-        private float _springConstant = 10.0f;
-        private float _dampingConstant = 1.0f;
-        private float _restLength = 1.5f;
+        [Tooltip("Spring constant (stiffness). Lower values for a softer spring.")]
+        [SerializeField] private float springConstant = 10.0f;
+
+        [Tooltip("Damping constant to control the spring's response.")]
+        [SerializeField] private float dampingConstant = 1.0f;
+
+        [Tooltip("Rest length of the spring when no force is applied.")]
+        [SerializeField] private float restLength = 1.5f;
 
         private Rigidbody _rb;
 
@@ -21,44 +32,42 @@ namespace Core.Player
 
         private void Update()
         {
-            SpringEffect();
+            ApplySpringEffect();
         }
-    
-        private void SpringEffect()
+
+        private void ApplySpringEffect()
         {
             Vector3 rayDirection = Vector3.down;
             Vector3 rayOrigin = transform.position;
             RaycastHit hit;
 
-            // Cast the ray
             if (Physics.Raycast(rayOrigin, rayDirection, out hit, Mathf.Infinity, groundLayer))
             {
-                // Calculate the distance to the ground
                 float distanceToGround = hit.distance;
-
-                // Calculate the displacement from the rest length
-                float displacement = _restLength - distanceToGround;
-
-                // Calculate the spring force using Hooke's law
-                float springForce = _springConstant * displacement;
-
-                // Calculate the damping force
-                float dampingForce = _dampingConstant * _rb.velocity.y;
-
-                // Calculate the total force
+                float displacement = restLength - distanceToGround;
+                float springForce = springConstant * displacement;
+                float dampingForce = dampingConstant * _rb.linearVelocity.y;
                 float totalForce = springForce - dampingForce;
 
-                // Apply the force to the Rigidbody
                 _rb.AddForce(Vector3.up * totalForce);
+                
+                if (debug)
+                {
+                    Debug.Log($"Distance to Ground: {distanceToGround}");
+                    Debug.Log($"Displacement: {displacement}");
+                    Debug.Log($"Spring Force: {springForce}");
+                    Debug.Log($"Damping Force: {dampingForce}");
+                    Debug.Log($"Total Force: {totalForce}");
+                }
             }
         }
-        
+
         private void OnDrawGizmos()
         {
             if (debug)
             {
                 Gizmos.color = Color.red;
-                Gizmos.DrawLine(transform.position, transform.position + Vector3.down * 10.0f); 
+                Gizmos.DrawLine(transform.position, transform.position + Vector3.down * 10.0f);
             }
         }
     }
