@@ -39,6 +39,7 @@ namespace Core.Player
         
         private Rigidbody _rb;
         private float _defaultSpringConstant;
+        private float _defaultRestLength;
 
         private void Awake()
         {
@@ -51,6 +52,7 @@ namespace Core.Player
         {
             _rb = GetComponent<Rigidbody>();
             _defaultSpringConstant = springConstant;
+            _defaultRestLength = restLength;
         }
 
         private void Update()
@@ -104,6 +106,7 @@ namespace Core.Player
         public void SetSlide(bool isSliding)
         {
             springConstant = isSliding ? 0.0f : _defaultSpringConstant;
+            restLength = isSliding ? 0.0f : _defaultRestLength;
         }
     }
 }

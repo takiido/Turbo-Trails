@@ -31,6 +31,11 @@ namespace Core.Player
         private InputAction _jumpAction;
         private InputAction _slideAction;
 
+        public Animator bodyAnimator;
+        public Animator legsAnimator;
+        private static readonly int IsJumping = Animator.StringToHash("isJumping");
+        private static readonly int IsSliding = Animator.StringToHash("isSliding");
+
         private void Awake()
         {
             InputActionAsset inputAction = GetComponent<PlayerInput>().actions;
@@ -67,10 +72,8 @@ namespace Core.Player
         private void Update()
         {
             //if (GameManager.Instance.isGameOver) return;
-            MoveFwd();
+            //MoveFwd();
             HandleInput();
-            HandleJump();
-            HandleSlide();
             HandleLaneChange();
             
             if (_laneChangeTimer > 0)
@@ -78,7 +81,13 @@ namespace Core.Player
                 _laneChangeTimer -= Time.deltaTime;
             }
         }
-        
+
+        private void FixedUpdate()
+        {
+            HandleJump();
+            HandleSlide();
+        }
+
         private void MoveFwd()
         {
             _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, _rb.linearVelocity.y, fwdSpeed);
@@ -88,7 +97,7 @@ namespace Core.Player
         {
             Vector2 moveInput = _moveActions.ReadValue<Vector2>();
 
-            if (_laneChangeTimer <= 0 && !_isJumping && !_isSliding)
+            if (_laneChangeTimer <= 0 && !_isSliding)
             {
                 if (moveInput.x < 0 && _curLane > 0)
                 {
@@ -101,27 +110,39 @@ namespace Core.Player
                     _laneChangeTimer = laneChangeCooldown;
                 }
             }
-            
+
             if (_jumpAction.triggered && !_isJumping)
+            {
                 Jump();
+            }
 
             if (_slideAction.triggered && !_isSliding)
-                Slide();
-        }
-
-        private void HandleJump()
-        {
-            if (_isJumping && _rb.linearVelocity.y <= 0.1f)
             {
-                if (Physics.Raycast(transform.position, Vector3.down, out _, 1.1f))
-                    _isJumping = false;
+                Slide();
             }
         }
-
+        
         private void Jump()
         {
-            _isJumping = true;
-            _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (!_isJumping)
+            {
+                _isJumping = true;
+                bodyAnimator.SetBool(IsJumping, true);
+                legsAnimator.SetBool(IsJumping, true);
+                _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
+        }
+        
+        private void Slide()
+        {
+            _springRaycast.SetSlide(true);
+            _isSliding = true;
+            bodyAnimator.SetBool(IsSliding, true);
+            legsAnimator.SetBool(IsSliding, true);
+            _sliderTimer = 0.0f;
+
+            pCollider.center = new Vector3(pCollider.center.x, pCollider.center.y / 2, pCollider.center.z);
+            pCollider.height /= 2;
         }
 
         private void HandleSlide()
@@ -133,21 +154,26 @@ namespace Core.Player
                     EndSlide();
             }
         }
-
-        private void Slide()
+        
+        private void HandleJump()
         {
-            _springRaycast.SetSlide(true);
-            _isSliding = true;
-            _sliderTimer = 0.0f;
-
-            pCollider.center = new Vector3(pCollider.center.x, pCollider.center.y / 2, pCollider.center.z);
-            pCollider.height /= 2;
+            if (_isJumping && _rb.linearVelocity.y <= 0.1f)
+            {
+                if (Physics.Raycast(transform.position, Vector3.down, out _, 1.8f, LayerMask.GetMask("Ground")))
+                {
+                    _isJumping = false;
+                    bodyAnimator.SetBool(IsJumping, false);
+                    legsAnimator.SetBool(IsJumping, false);
+                }
+            }
         }
-
+        
         private void EndSlide()
         {
             _springRaycast.SetSlide(false);
             _isSliding = false;
+            bodyAnimator.SetBool(IsSliding, false);
+            legsAnimator.SetBool(IsSliding, false);
             
             pCollider.center = new Vector3(pCollider.center.x, pCollider.center.y * 2, pCollider.center.z);
             pCollider.height *= 2;
