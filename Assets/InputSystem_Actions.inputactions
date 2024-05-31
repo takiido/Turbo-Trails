@@ -171,33 +171,11 @@
                     "id": "ab621601-5ca1-431b-afb1-72dc5046ef0b",
                     "path": "2DVector",
                     "interactions": "",
-                    "processors": "",
+                    "processors": "StickDeadzone,StickDeadzone",
                     "groups": "",
                     "action": "Move",
                     "isComposite": true,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "up",
-                    "id": "f2c2b81a-9c0d-4bf7-81fa-3c4576f19aba",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "down",
-                    "id": "c0d0a92a-f5d9-4264-a709-a7603fb163a6",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": true
                 },
                 {
                     "name": "left",
@@ -205,7 +183,7 @@
                     "path": "<Touchscreen>/delta/left",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Touch",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -216,7 +194,7 @@
                     "path": "<Touchscreen>/delta/right",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Touch",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -255,6 +233,28 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "894b6d25-3789-4c89-b1fb-dbeff1d24408",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "AxisDeadzone",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "positive",
+                    "id": "c47ed68b-c89c-4549-8111-c6f1ba19fd2f",
+                    "path": "<Touchscreen>/delta/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "ce616749-4b05-4bb5-87b2-c3d65b60a8e3",
                     "path": "<Keyboard>/shift",
@@ -264,6 +264,28 @@
                     "action": "Slide",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "1718bd24-78b0-4737-9ba0-c30607144d02",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "AxisDeadzone",
+                    "groups": "",
+                    "action": "Slide",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "positive",
+                    "id": "86943a09-00a2-485b-88cf-5e54bd133c00",
+                    "path": "<Touchscreen>/delta/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Slide",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },

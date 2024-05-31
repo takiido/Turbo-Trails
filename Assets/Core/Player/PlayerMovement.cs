@@ -2,7 +2,6 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 namespace Core.Player
 {
@@ -58,7 +57,7 @@ namespace Core.Player
         private void Start()
         {
             _rb = GetComponent<Rigidbody>();
-            _springRaycast = GetComponent<SpringRaycast>();
+            _springRaycast = SpringRaycast.Instance;
             _targetPos = transform.position;
 
             _isJumping = false;
@@ -89,7 +88,7 @@ namespace Core.Player
         {
             Vector2 moveInput = _moveActions.ReadValue<Vector2>();
 
-            if (_laneChangeTimer <= 0)
+            if (_laneChangeTimer <= 0 && !_isJumping && !_isSliding)
             {
                 if (moveInput.x < 0 && _curLane > 0)
                 {
@@ -137,7 +136,7 @@ namespace Core.Player
 
         private void Slide()
         {
-            _springRaycast.enabled = false;
+            _springRaycast.SetSlide(true);
             _isSliding = true;
             _sliderTimer = 0.0f;
 
@@ -147,7 +146,7 @@ namespace Core.Player
 
         private void EndSlide()
         {
-            _springRaycast.enabled = true;
+            _springRaycast.SetSlide(false);
             _isSliding = false;
             
             pCollider.center = new Vector3(pCollider.center.x, pCollider.center.y * 2, pCollider.center.z);
