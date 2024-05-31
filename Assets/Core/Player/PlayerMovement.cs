@@ -67,7 +67,7 @@ namespace Core.Player
         private void Update()
         {
             //if (GameManager.Instance.isGameOver) return;
-            //MoveFwd();
+            MoveFwd();
             HandleInput();
             HandleJump();
             HandleSlide();
