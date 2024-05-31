@@ -26,22 +26,26 @@ namespace Core.Player
         private Vector3 _targetPos;
 
         private InputAction _moveActions;
+        private InputAction _jumpAction;
 
         private void Awake()
         {
             InputActionAsset inputAction = GetComponent<PlayerInput>().actions;
 
             _moveActions = inputAction.FindAction("Move");
+            _jumpAction = inputAction.FindAction("Jump");
         }
 
         private void OnEnable()
         {
             _moveActions.Enable();
+            _jumpAction.Enable();
         }
 
         private void OnDisable()
         {
             _moveActions.Disable();
+            _jumpAction.Disable();
         }
 
         private void Start()
@@ -53,14 +57,20 @@ namespace Core.Player
         private void Update()
         {
             //if (GameManager.Instance.isGameOver) return;
-            HandleInput();
             //MoveFwd();
+            HandleInput();
+            HandleJump();
             HandleLaneChange();
             
             if (_laneChangeTimer > 0)
             {
                 _laneChangeTimer -= Time.deltaTime;
             }
+        }
+        
+        private void MoveFwd()
+        {
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, _rb.linearVelocity.y, fwdSpeed);
         }
 
         private void HandleInput()
@@ -80,13 +90,27 @@ namespace Core.Player
                     _laneChangeTimer = laneChangeCooldown;
                 }
             }
+            
+            if (_jumpAction.triggered && !_isJumping)
+                Jump();
         }
 
-        private void MoveFwd()
+        private void HandleJump()
         {
-            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, _rb.linearVelocity.y, fwdSpeed);
+            if (_isJumping && _rb.linearVelocity.y <= 0.1f)
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.1f))
+                    _isJumping = false;
+            }
         }
 
+        private void Jump()
+        {
+            _isJumping = true;
+            _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+        
         private void HandleLaneChange()
         {
             _targetPos = new Vector3((_curLane - 1) * laneWidth, transform.position.y, transform.position.z);
