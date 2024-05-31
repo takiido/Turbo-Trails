@@ -1084,6 +1084,7 @@ MonoBehaviour:
   jumpForce: 30
   slideDuration: 1
   laneChangeCooldown: 0.5
+  pCollider: {fileID: 1631845489}
 --- !u!114 &1775586773
 MonoBehaviour:
   m_ObjectHideFlags: 0

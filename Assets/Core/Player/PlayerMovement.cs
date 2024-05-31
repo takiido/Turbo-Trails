@@ -1,8 +1,8 @@
 //Copyright takiido. All Rights Reserved.
 
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Core.Player
 {
@@ -15,10 +15,13 @@ namespace Core.Player
         public float jumpForce = 10.0f;
         public float slideDuration = 1.0f;
         public float laneChangeCooldown = 0.5f;
+
+        public CapsuleCollider pCollider;
         
         private Rigidbody _rb;
-        private bool _isJumping = false;
-        private bool _isSliding = false;
+        private SpringRaycast _springRaycast;
+        private bool _isJumping;
+        private bool _isSliding;
         private float _sliderTimer;
         private float _laneChangeTimer;
 
@@ -27,6 +30,7 @@ namespace Core.Player
 
         private InputAction _moveActions;
         private InputAction _jumpAction;
+        private InputAction _slideAction;
 
         private void Awake()
         {
@@ -34,24 +38,31 @@ namespace Core.Player
 
             _moveActions = inputAction.FindAction("Move");
             _jumpAction = inputAction.FindAction("Jump");
+            _slideAction = inputAction.FindAction("Slide");
         }
 
         private void OnEnable()
         {
             _moveActions.Enable();
             _jumpAction.Enable();
+            _slideAction.Enable();
         }
 
         private void OnDisable()
         {
             _moveActions.Disable();
             _jumpAction.Disable();
+            _slideAction.Disable();
         }
 
         private void Start()
         {
             _rb = GetComponent<Rigidbody>();
+            _springRaycast = GetComponent<SpringRaycast>();
             _targetPos = transform.position;
+
+            _isJumping = false;
+            _isSliding = false;
         }
     
         private void Update()
@@ -60,6 +71,7 @@ namespace Core.Player
             //MoveFwd();
             HandleInput();
             HandleJump();
+            HandleSlide();
             HandleLaneChange();
             
             if (_laneChangeTimer > 0)
@@ -93,14 +105,16 @@ namespace Core.Player
             
             if (_jumpAction.triggered && !_isJumping)
                 Jump();
+
+            if (_slideAction.triggered && !_isSliding)
+                Slide();
         }
 
         private void HandleJump()
         {
             if (_isJumping && _rb.linearVelocity.y <= 0.1f)
             {
-                RaycastHit hit;
-                if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.1f))
+                if (Physics.Raycast(transform.position, Vector3.down, out _, 1.1f))
                     _isJumping = false;
             }
         }
@@ -109,6 +123,35 @@ namespace Core.Player
         {
             _isJumping = true;
             _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+
+        private void HandleSlide()
+        {
+            if (_isSliding)
+            {
+                _sliderTimer += Time.deltaTime;
+                if (_sliderTimer >= slideDuration)
+                    EndSlide();
+            }
+        }
+
+        private void Slide()
+        {
+            _springRaycast.enabled = false;
+            _isSliding = true;
+            _sliderTimer = 0.0f;
+
+            pCollider.center = new Vector3(pCollider.center.x, pCollider.center.y / 2, pCollider.center.z);
+            pCollider.height /= 2;
+        }
+
+        private void EndSlide()
+        {
+            _springRaycast.enabled = true;
+            _isSliding = false;
+            
+            pCollider.center = new Vector3(pCollider.center.x, pCollider.center.y * 2, pCollider.center.z);
+            pCollider.height *= 2;
         }
         
         private void HandleLaneChange()
